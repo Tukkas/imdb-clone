@@ -11,4 +11,9 @@ class Movie extends Model
         'year',
         'description',
     ];
+
+    public function genres()
+    {
+        return $this->belongsToMany(Genre::class);
+    }
 }
