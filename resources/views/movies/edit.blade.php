@@ -33,6 +33,34 @@
             <textarea name="description" id="description" class="form-control" rows="5">{{ old('description', $movie->description) }}</textarea>
         </div>
 
+        <div class="mb-3">
+            <label class="form-label">Genres</label>
+            @foreach($genres as $genre)
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="genres[]" value="{{ $genre->id }}"
+                        id="genre{{ $genre->id }}"
+                        {{ $movie->genres->contains($genre->id) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="genre{{ $genre->id }}">
+                        {{ $genre->name }}
+                    </label>
+                </div>
+            @endforeach
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Actors</label>
+            @foreach($actors as $actor)
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="actors[]" value="{{ $actor->id }}"
+                        id="actor{{ $actor->id }}"
+                        {{ $movie->actors->contains($actor->id) ? 'checked' : '' }}>
+                    <label class="form-check-label" for="actor{{ $actor->id }}">
+                        {{ $actor->name }}
+                    </label>
+                </div>
+            @endforeach
+        </div>
+
         <button type="submit" class="btn btn-success">Update Movie</button>
         <a href="{{ route('movies.index') }}" class="btn btn-secondary">Cancel</a>
     </form>

@@ -16,4 +16,14 @@ class Movie extends Model
     {
         return $this->belongsToMany(Genre::class);
     }
+
+    public function actors()
+    {
+        return $this->belongsToMany(Actor::class)->withPivot('character_name');
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
 }
