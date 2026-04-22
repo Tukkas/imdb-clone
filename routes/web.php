@@ -5,6 +5,7 @@ use App\Http\Controllers\GenreController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ActorController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -23,8 +24,20 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-Route::resource('movies', MovieController::class);
-Route::resource('genres', GenreController::class);
-Route::resource('actors', ActorController::class);
+Route::get('/admin', [AdminController::class, 'index'])
+    ->name('admin.index')
+    ->middleware('admin');
 
-Route::post('/movies/{movie}/rate', [RatingController::class, 'store'])->name('movies.rate')->middleware('auth');
+Route::resource('movies', MovieController::class)
+    ->except(['index', 'show'])
+    ->middleware('admin');
+
+Route::post('/movies/{movie}/rate', [RatingController::class, 'store'])
+    ->name('movies.rate')
+    ->middleware('auth');
+
+Route::resource('movies', MovieController::class)->only(['index', 'show']);
+
+Route::resource('genres', GenreController::class)->middleware('admin');
+
+Route::resource('actors', ActorController::class)->middleware('admin');
