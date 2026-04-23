@@ -39,8 +39,13 @@
             box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
         }
 
+        .movie-card .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
         .movie-poster-placeholder {
-            height: 320px;
+            height: 180px;
             display: flex;
             align-items: flex-start;
             justify-content: flex-start;
@@ -51,9 +56,26 @@
             background: linear-gradient(135deg, #6ea8fe, #8eecf5);
         }
 
+        .movie-card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            height: 100%;
+        }
+
+        .movie-card-link:hover {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .movie-card .card-body {
+            padding: 0.75rem;
+        }
+
         .movie-rating {
             font-weight: 600;
             color: #f4b400;
+            font-size: 0.9rem;
         }
 
         .movie-meta {
@@ -100,6 +122,63 @@
 
         .navbar {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        }
+
+        .form-shell {
+            max-width: 820px;
+            margin: 0 auto;
+        }
+
+        .form-card,
+        .admin-table-card,
+        .auth-card {
+            border: none;
+            border-radius: 18px;
+            background: #ffffff;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+
+        .form-card .card-body,
+        .admin-table-card .card-body,
+        .auth-card .card-body {
+            padding: 2rem;
+        }
+
+        .page-subtitle {
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+
+        .soft-table thead th {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .soft-table td,
+        .soft-table th {
+            vertical-align: middle;
+        }
+
+        .admin-page-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-wrapper {
+            max-width: 460px;
+            margin: 2rem auto;
+        }
+
+        .auth-title {
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+
+        .empty-state {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 2rem;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+            text-align: center;
         }
     </style>
 </head>

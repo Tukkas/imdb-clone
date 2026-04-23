@@ -6,6 +6,7 @@ use App\Http\Controllers\MovieController;
 use App\Http\Controllers\ActorController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -41,3 +42,15 @@ Route::resource('movies', MovieController::class)->only(['index', 'show']);
 Route::resource('genres', GenreController::class)->middleware('admin');
 
 Route::resource('actors', ActorController::class)->middleware('admin');
+
+Route::post('/movies/{movie}/reviews', [ReviewController::class, 'store'])
+    ->name('reviews.store')
+    ->middleware('auth');
+
+Route::put('/reviews/{review}', [ReviewController::class, 'update'])
+    ->name('reviews.update')
+    ->middleware('auth');
+
+Route::delete('/reviews/{review}', [ReviewController::class, 'destroy'])
+    ->name('reviews.destroy')
+    ->middleware('auth');

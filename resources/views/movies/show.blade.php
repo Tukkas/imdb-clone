@@ -85,6 +85,100 @@
                     </div>
                 </div>
             @endauth
+
+            @auth
+                <div class="card details-card mt-4">
+                    <div class="card-body p-4">
+                        <h4 class="mb-3">Write a Review</h4>
+
+                        @if($errors->any())
+                            <div class="alert alert-danger rounded-4">
+                                <ul class="mb-0">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+
+                        <form action="{{ route('reviews.store', $movie) }}" method="POST">
+                            @csrf
+
+                            <div class="mb-3">
+                                <label for="body" class="form-label">Your Review</label>
+                                <textarea name="body" id="body" rows="4" class="form-control" required>{{ old('body') }}</textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-dark">Post Review</button>
+                        </form>
+                    </div>
+                </div>
+            @endauth
+
+            <div class="card details-card mt-4">
+                <div class="card-body p-4">
+                    <h4 class="mb-3">Reviews</h4>
+
+                    @if($movie->reviews->count())
+                        <div class="d-flex flex-column gap-3">
+                            @foreach($movie->reviews as $review)
+                                <div class="border rounded-4 p-3">
+                                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-2">
+                                        <div>
+                                            <strong>{{ $review->user->name }}</strong>
+                                            <div class="text-muted small">
+                                                {{ $review->created_at->format('Y-m-d H:i') }}
+                                            </div>
+                                        </div>
+
+                                        @auth
+                                            @if(auth()->id() === $review->user_id)
+                                                <div class="d-flex gap-2">
+                                                    <button class="btn btn-outline-primary btn-sm" type="button"
+                                                        data-bs-toggle="collapse"
+                                                        data-bs-target="#editReview{{ $review->id }}">
+                                                        Edit
+                                                    </button>
+
+                                                    <form action="{{ route('reviews.destroy', $review) }}" method="POST">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                            onclick="return confirm('Delete this review?')">
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            @endif
+                                        @endauth
+                                    </div>
+
+                                    <p class="mb-0">{{ $review->body }}</p>
+
+                                    @auth
+                                        @if(auth()->id() === $review->user_id)
+                                            <div class="collapse mt-3" id="editReview{{ $review->id }}">
+                                                <form action="{{ route('reviews.update', $review) }}" method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+
+                                                    <div class="mb-2">
+                                                        <textarea name="body" rows="3" class="form-control" required>{{ $review->body }}</textarea>
+                                                    </div>
+
+                                                    <button type="submit" class="btn btn-dark btn-sm">Save Changes</button>
+                                                </form>
+                                            </div>
+                                        @endif
+                                    @endauth
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-muted mb-0">No reviews yet.</p>
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 </div>

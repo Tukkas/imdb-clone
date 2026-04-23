@@ -11,7 +11,7 @@ class MovieController extends Controller
 {
     public function index()
     {
-        $movies = Movie::with(['genres', 'ratings'])->latest()->paginate(20);
+        $movies = Movie::with(['genres', 'ratings'])->latest()->paginate(24);
         return view('movies.index', compact('movies'));
     }
 
@@ -58,7 +58,7 @@ class MovieController extends Controller
 
     public function show(Movie $movie)
     {
-        $movie->load('genres', 'actors', 'ratings');
+        $movie->load(['genres', 'actors', 'ratings', 'reviews.user']);
         return view('movies.show', compact('movie'));
     }
 
