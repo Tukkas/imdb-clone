@@ -8,6 +8,7 @@ use App\Http\Controllers\RatingController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\WatchlistController;
+use App\Http\Controllers\MovieSuggestionController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/movies');
@@ -23,6 +24,9 @@ require __DIR__.'/auth.php';
 Route::get('/admin', [AdminController::class, 'index'])
     ->name('admin.index')
     ->middleware('admin');
+
+Route::get('/search', [MovieController::class, 'globalSearch'])
+    ->name('search.global');
 
 Route::resource('movies', MovieController::class)
     ->except(['index', 'show'])
@@ -68,3 +72,27 @@ Route::delete('/movies/{movie}/watchlist', [WatchlistController::class, 'destroy
 Route::get('/watchlist', [WatchlistController::class, 'index'])
     ->name('watchlist.index')
     ->middleware('auth');
+
+// USER ROUTES
+Route::get('/suggest-movie', [MovieSuggestionController::class, 'create'])
+    ->middleware('auth')
+    ->name('suggestions.create');
+
+Route::post('/suggest-movie', [MovieSuggestionController::class, 'store'])
+    ->middleware('auth')
+    ->name('suggestions.store');
+
+// ADMIN ROUTES
+Route::get('/admin/suggestions', [MovieSuggestionController::class, 'index'])
+    ->middleware('admin')
+    ->name('suggestions.index');
+
+Route::post('/admin/suggestions/{suggestion}/approve',
+    [MovieSuggestionController::class, 'approve'])
+    ->middleware('admin')
+    ->name('suggestions.approve');
+
+Route::post('/admin/suggestions/{suggestion}/reject',
+    [MovieSuggestionController::class, 'reject'])
+    ->middleware('admin')
+    ->name('suggestions.reject');

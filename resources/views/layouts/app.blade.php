@@ -288,10 +288,18 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('watchlist.index') }}">My Watchlist</a>
                         </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('suggestions.create') }}">Suggest Movie</a>
+                        </li>
                     @endauth
 
                     @auth
                         @if(auth()->user()->role === 'admin')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('suggestions.index') }}">Suggestions</a>
+                            </li>
+                            
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('admin.index') }}">Admin Panel</a>
                             </li>
@@ -299,16 +307,21 @@
                     @endauth
                 </ul>
 
-                <form class="d-flex position-relative me-auto ms-3" role="search" onsubmit="return false;">
+                <form class="d-flex position-relative me-auto ms-3"
+                    role="search"
+                    onsubmit="return false;">
+
                     <input
-                        id="actor-search"
+                        id="global-search"
                         class="form-control"
                         type="search"
-                        placeholder="Search actors..."
-                        autocomplete="off"
-                    >
+                        placeholder="Search movies or actors..."
+                        autocomplete="off">
 
-                    <div id="actor-results" class="list-group position-absolute w-100" style="top: 100%; z-index: 1000;"></div>
+                    <div id="global-results"
+                        class="list-group position-absolute w-100"
+                        style="top: 100%; z-index: 1000;">
+                    </div>
                 </form>
 
                 <ul class="navbar-nav ms-auto align-items-lg-center">
@@ -343,12 +356,16 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const input = document.getElementById("actor-search");
-            const resultsBox = document.getElementById("actor-results");
+
+            const input = document.getElementById("global-search");
+            const resultsBox = document.getElementById("global-results");
+
+            if (!input) return;
 
             let timeout = null;
 
             input.addEventListener("keyup", function () {
+
                 clearTimeout(timeout);
 
                 const query = this.value;
@@ -359,31 +376,92 @@
                 }
 
                 timeout = setTimeout(() => {
-                    fetch(`/actors/search?query=${query}`)
+
+                    fetch(`/search?query=${query}`)
                         .then(response => response.json())
                         .then(data => {
+
                             resultsBox.innerHTML = "";
 
-                            if (data.length === 0) {
-                                resultsBox.innerHTML = '<div class="list-group-item text-muted">No results</div>';
-                                return;
+                            // MOVIES
+                            if (data.movies.length > 0) {
+
+                                const movieHeader =
+                                    document.createElement("div");
+
+                                movieHeader.className =
+                                    "list-group-item text-muted small fw-bold";
+
+                                movieHeader.textContent = "Movies";
+
+                                resultsBox.appendChild(movieHeader);
+
+                                data.movies.forEach(movie => {
+
+                                    const item =
+                                        document.createElement("a");
+
+                                    item.href = `/movies/${movie.id}`;
+
+                                    item.className =
+                                        "list-group-item list-group-item-action";
+
+                                    item.textContent = `🎬 ${movie.title}`;
+
+                                    resultsBox.appendChild(item);
+                                });
                             }
 
-                            data.forEach(actor => {
-                                const item = document.createElement("a");
-                                item.href = `/actors/${actor.id}`;
-                                item.className = "list-group-item list-group-item-action";
-                                item.textContent = actor.name;
+                            // ACTORS
+                            if (data.actors.length > 0) {
 
-                                resultsBox.appendChild(item);
-                            });
+                                const actorHeader =
+                                    document.createElement("div");
+
+                                actorHeader.className =
+                                    "list-group-item text-muted small fw-bold";
+
+                                actorHeader.textContent = "Actors";
+
+                                resultsBox.appendChild(actorHeader);
+
+                                data.actors.forEach(actor => {
+
+                                    const item =
+                                        document.createElement("a");
+
+                                    item.href = `/actors/${actor.id}`;
+
+                                    item.className =
+                                        "list-group-item list-group-item-action";
+
+                                    item.textContent = `👤 ${actor.name}`;
+
+                                    resultsBox.appendChild(item);
+                                });
+                            }
+
+                            // NO RESULTS
+                            if (
+                                data.movies.length === 0 &&
+                                data.actors.length === 0
+                            ) {
+
+                                resultsBox.innerHTML =
+                                    '<div class="list-group-item text-muted">No results</div>';
+                            }
                         });
+
                 }, 300);
             });
 
-            // hide dropdown when clicking outside
             document.addEventListener("click", function (e) {
-                if (!input.contains(e.target) && !resultsBox.contains(e.target)) {
+
+                if (
+                    !input.contains(e.target) &&
+                    !resultsBox.contains(e.target)
+                ) {
+
                     resultsBox.innerHTML = "";
                 }
             });

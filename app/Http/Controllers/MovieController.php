@@ -101,6 +101,24 @@ class MovieController extends Controller
         return redirect()->route('movies.index')->with('success', 'Movie updated successfully.');
     }
 
+    public function globalSearch(Request $request)
+    {
+        $query = $request->get('query');
+
+        $movies = Movie::where('title', 'like', '%' . $query . '%')
+            ->limit(5)
+            ->get(['id', 'title']);
+
+        $actors = Actor::where('name', 'like', '%' . $query . '%')
+            ->limit(5)
+            ->get(['id', 'name']);
+
+        return response()->json([
+            'movies' => $movies,
+            'actors' => $actors,
+        ]);
+    }
+    
     public function destroy(Movie $movie)
     {
         $movie->delete();
