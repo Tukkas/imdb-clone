@@ -9,10 +9,70 @@ use Illuminate\Http\Request;
 
 class MovieController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $movies = Movie::with(['genres', 'ratings'])->latest()->paginate(24);
-        return view('movies.index', compact('movies'));
+        $query = Movie::query()
+            ->with(['genres', 'ratings']);
+
+        // SEARCH
+        if ($request->filled('search')) {
+            $query->where('title', 'like', '%' . $request->search . '%');
+        }
+
+        // GENRE FILTER
+        if ($request->filled('genre')) {
+
+            $query->whereHas('genres', function ($q) use ($request) {
+
+                $q->where('genres.id', $request->genre);
+            });
+        }
+
+        // YEAR FILTER
+        if ($request->filled('year')) {
+
+            $query->where('year', $request->year);
+        }
+
+        // MINIMUM RATING FILTER
+        if ($request->filled('rating')) {
+
+            $query->whereHas('ratings', function ($q) use ($request) {
+
+                $q->selectRaw('AVG(value)')
+                    ->groupBy('movie_id')
+                    ->havingRaw('AVG(value) >= ?', [$request->rating]);
+            });
+        }
+
+        // SORTING
+        switch ($request->sort) {
+
+            case 'newest':
+                $query->orderBy('year', 'desc');
+                break;
+
+            case 'oldest':
+                $query->orderBy('year', 'asc');
+                break;
+
+            case 'title_asc':
+                $query->orderBy('title', 'asc');
+                break;
+
+            case 'title_desc':
+                $query->orderBy('title', 'desc');
+                break;
+
+            default:
+                $query->latest();
+        }
+
+        $movies = $query->paginate(20)->withQueryString();
+
+        $genres = Genre::orderBy('name')->get();
+
+        return view('movies.index', compact('movies', 'genres'));
     }
 
     public function create()

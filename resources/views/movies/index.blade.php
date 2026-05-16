@@ -24,6 +24,111 @@
         </div>
     @endif
 
+    <div class="card border-0 shadow-sm rounded-4 mb-4">
+        <div class="card-body">
+
+            <form method="GET"
+                action="{{ route('movies.index') }}">
+
+                <div class="row g-3">
+
+                    <!-- GENRE -->
+                    <div class="col-md-3">
+                        <label class="form-label">Genre</label>
+
+                        <select name="genre"
+                            class="form-select">
+
+                            <option value="">All Genres</option>
+
+                            @foreach($genres as $genre)
+
+                                <option value="{{ $genre->id }}"
+                                    {{ request('genre') == $genre->id ? 'selected' : '' }}>
+
+                                    {{ $genre->name }}
+
+                                </option>
+
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- YEAR -->
+                    <div class="col-md-2">
+                        <label class="form-label">Year</label>
+
+                        <input type="number"
+                            name="year"
+                            class="form-control"
+                            min="1888"
+                            max="{{ date('Y') }}"
+                            value="{{ request('year') }}">
+                    </div>
+
+                    <!-- RATING -->
+                    <div class="col-md-2">
+                        <label class="form-label">Min Rating</label>
+
+                        <input type="number"
+                            min="1"
+                            max="10"
+                            name="rating"
+                            class="form-control"
+                            value="{{ request('rating') }}">
+                    </div>
+
+                    <!-- SORT -->
+                    <div class="col-md-3">
+                        <label class="form-label">Sort By</label>
+
+                        <select name="sort"
+                            class="form-select">
+
+                            <option value="">Latest</option>
+
+                            <option value="newest"
+                                {{ request('sort') == 'newest' ? 'selected' : '' }}>
+                                Newest
+                            </option>
+
+                            <option value="oldest"
+                                {{ request('sort') == 'oldest' ? 'selected' : '' }}>
+                                Oldest
+                            </option>
+
+                            <option value="title_asc"
+                                {{ request('sort') == 'title_asc' ? 'selected' : '' }}>
+                                Title A-Z
+                            </option>
+
+                            <option value="title_desc"
+                                {{ request('sort') == 'title_desc' ? 'selected' : '' }}>
+                                Title Z-A
+                            </option>
+
+                        </select>
+                    </div>
+
+                    <!-- BUTTONS -->
+                    <div class="col-md-2 d-flex align-items-end gap-2">
+
+                        <button class="btn btn-dark w-100">
+                            Apply
+                        </button>
+
+                        <a href="{{ route('movies.index') }}"
+                            class="btn btn-outline-secondary">
+
+                            Reset
+                        </a>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     @if($movies->count())
         <div class="row g-3">
             @foreach($movies as $movie)
