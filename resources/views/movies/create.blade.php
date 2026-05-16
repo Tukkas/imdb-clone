@@ -55,19 +55,21 @@
                     </div>
 
                     <div class="mb-4">
-                        <label class="form-label fw-semibold">Actors</label>
-                        <div class="row">
-                            @foreach($actors as $actor)
-                                <div class="col-md-6 mb-2">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="actors[]" value="{{ $actor->id }}" id="actor{{ $actor->id }}">
-                                        <label class="form-check-label" for="actor{{ $actor->id }}">
-                                            {{ $actor->name }}
-                                        </label>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
+                        <label class="form-label">Actors</label>
+
+                        <input
+                            type="text"
+                            id="actor-picker-search"
+                            class="form-control"
+                            placeholder="Search actors..."
+                            autocomplete="off"
+                        >
+
+                        <div id="actor-picker-results"
+                            class="list-group mt-2"></div>
+
+                        <div id="selected-actors"
+                            class="d-flex flex-wrap gap-2 mt-3"></div>
                     </div>
 
                     <div class="d-flex gap-2 flex-wrap">

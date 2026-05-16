@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $isInWatchlist = auth()->check() && auth()->user()->watchlistMovies->contains($movie->id);
+@endphp
 <div class="container">
     <a href="{{ route('movies.index') }}" class="btn btn-outline-secondary btn-sm mb-4">← Back to Movies</a>
 
@@ -63,6 +66,21 @@
                                 <a href="{{ route('movies.edit', $movie) }}" class="btn btn-primary">Edit Movie</a>
                             @endif
                         @endauth
+
+                        @auth
+                            @if($isInWatchlist)
+                                <form action="{{ route('watchlist.destroy', $movie) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-danger">Remove from Watchlist</button>
+                                </form>
+                            @else
+                                <form action="{{ route('watchlist.store', $movie) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-dark">Add to Watchlist</button>
+                                </form>
+                            @endif
+                        @endauth
                     </div>
                 </div>
             </div>
@@ -75,9 +93,21 @@
                         <form action="{{ route('movies.rate', $movie) }}" method="POST">
                             @csrf
 
-                            <div class="mb-3">
-                                <label for="value" class="form-label">Your Rating (1–10)</label>
-                                <input type="number" name="value" id="value" class="form-control" min="1" max="10" required>
+                            <div class="mb-4">
+                                <label class="form-label d-block">Your Rating</label>
+
+                                <input type="hidden" name="value" id="rating-value" required>
+
+                                <div class="star-rating">
+                                    @for($i = 1; $i <= 10; $i++)
+                                        <span class="rating-star" data-value="{{ $i }}">★</span>
+                                    @endfor
+                                </div>
+
+                                <div class="mt-2 text-muted small">
+                                    Selected rating:
+                                    <span id="selected-rating">0</span>/10
+                                </div>
                             </div>
 
                             <button type="submit" class="btn btn-dark">Submit Rating</button>

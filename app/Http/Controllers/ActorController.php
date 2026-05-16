@@ -58,6 +58,17 @@ class ActorController extends Controller
         return redirect()->route('actors.index')->with('success', 'Actor updated successfully.');
     }
 
+    public function search(Request $request)
+    {
+        $search = $request->get('query');
+
+        $actors = Actor::where('name', 'like', '%' . $search . '%')
+            ->limit(5)
+            ->get(['id', 'name']);
+
+        return response()->json($actors);
+    }
+
     public function destroy(Actor $actor)
     {
         $actor->delete();

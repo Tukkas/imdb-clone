@@ -31,7 +31,6 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
             background: #ffffff;
-            height: 100%;
         }
 
         .movie-card:hover {
@@ -60,7 +59,6 @@
             text-decoration: none;
             color: inherit;
             display: block;
-            height: 100%;
         }
 
         .movie-card-link:hover {
@@ -180,6 +178,95 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
             text-align: center;
         }
+
+        .movie-card {
+            position: relative;
+        }
+
+        .watchlist-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 10;
+        }
+
+        .watchlist-btn form {
+            margin: 0;
+        }
+
+        .watchlist-btn button {
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        .watchlist-btn button {
+            opacity: 0.9;
+        }
+
+        #actor-results {
+            max-height: 250px;
+            overflow-y: auto;
+            border-radius: 10px;
+            margin-top: 5px;
+        }
+
+        #actor-results a {
+            border: none;
+            border-bottom: 1px solid #eee;
+        }
+
+        #actor-results a:hover {
+            background-color: #f8f9fa;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            font-size: 2rem;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .rating-star {
+            color: #d1d5db;
+            transition: color 0.15s ease;
+        }
+
+        .rating-star.active {
+            color: #f4b400;
+        }
+
+        .rating-star:hover {
+            color: #f4b400;
+        }
+
+        .actor-tag {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f1f3f5;
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+
+        .actor-tag button {
+            border: none;
+            background: none;
+            color: #dc3545;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        #actor-picker-results {
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
     </style>
 </head>
 <body>
@@ -198,6 +285,12 @@
                     </li>
 
                     @auth
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('watchlist.index') }}">My Watchlist</a>
+                        </li>
+                    @endauth
+
+                    @auth
                         @if(auth()->user()->role === 'admin')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('admin.index') }}">Admin Panel</a>
@@ -205,6 +298,18 @@
                         @endif
                     @endauth
                 </ul>
+
+                <form class="d-flex position-relative me-auto ms-3" role="search" onsubmit="return false;">
+                    <input
+                        id="actor-search"
+                        class="form-control"
+                        type="search"
+                        placeholder="Search actors..."
+                        autocomplete="off"
+                    >
+
+                    <div id="actor-results" class="list-group position-absolute w-100" style="top: 100%; z-index: 1000;"></div>
+                </form>
 
                 <ul class="navbar-nav ms-auto align-items-lg-center">
                     @auth
@@ -235,5 +340,198 @@
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const input = document.getElementById("actor-search");
+            const resultsBox = document.getElementById("actor-results");
+
+            let timeout = null;
+
+            input.addEventListener("keyup", function () {
+                clearTimeout(timeout);
+
+                const query = this.value;
+
+                if (query.length < 2) {
+                    resultsBox.innerHTML = "";
+                    return;
+                }
+
+                timeout = setTimeout(() => {
+                    fetch(`/actors/search?query=${query}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            resultsBox.innerHTML = "";
+
+                            if (data.length === 0) {
+                                resultsBox.innerHTML = '<div class="list-group-item text-muted">No results</div>';
+                                return;
+                            }
+
+                            data.forEach(actor => {
+                                const item = document.createElement("a");
+                                item.href = `/actors/${actor.id}`;
+                                item.className = "list-group-item list-group-item-action";
+                                item.textContent = actor.name;
+
+                                resultsBox.appendChild(item);
+                            });
+                        });
+                }, 300);
+            });
+
+            // hide dropdown when clicking outside
+            document.addEventListener("click", function (e) {
+                if (!input.contains(e.target) && !resultsBox.contains(e.target)) {
+                    resultsBox.innerHTML = "";
+                }
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const stars = document.querySelectorAll(".rating-star");
+            const ratingInput = document.getElementById("rating-value");
+            const selectedRating = document.getElementById("selected-rating");
+
+            if (!stars.length) return;
+
+            let selectedValue = 0;
+
+            function highlightStars(value) {
+                stars.forEach(s => {
+                    s.classList.remove("active");
+
+                    if (parseInt(s.dataset.value) <= value) {
+                        s.classList.add("active");
+                    }
+                });
+            }
+
+            stars.forEach(star => {
+
+                // hover preview
+                star.addEventListener("mouseenter", function () {
+                    const value = parseInt(this.dataset.value);
+                    highlightStars(value);
+                });
+
+                // click selection
+                star.addEventListener("click", function () {
+                    selectedValue = parseInt(this.dataset.value);
+
+                    ratingInput.value = selectedValue;
+                    selectedRating.textContent = selectedValue;
+
+                    highlightStars(selectedValue);
+                });
+            });
+
+            // restore selected rating when leaving stars area
+            const starContainer = document.querySelector(".star-rating");
+
+            starContainer.addEventListener("mouseleave", function () {
+                highlightStars(selectedValue);
+            });
+        });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            const searchInput = document.getElementById("actor-picker-search");
+
+            if (!searchInput) return;
+
+            const resultsBox = document.getElementById("actor-picker-results");
+            const selectedBox = document.getElementById("selected-actors");
+
+            let selectedActors = {};
+
+            if (window.preloadedActors) {
+
+                window.preloadedActors.forEach(actor => {
+
+                    selectedActors[actor.id] = actor.name;
+                });
+
+                renderSelectedActors();
+            }
+
+            searchInput.addEventListener("keyup", function () {
+
+                const query = this.value;
+
+                if (query.length < 2) {
+                    resultsBox.innerHTML = "";
+                    return;
+                }
+
+                fetch(`/actors/search?query=${query}`)
+                    .then(response => response.json())
+                    .then(data => {
+
+                        resultsBox.innerHTML = "";
+
+                        data.forEach(actor => {
+
+                            if (selectedActors[actor.id]) {
+                                return;
+                            }
+
+                            const item = document.createElement("button");
+
+                            item.type = "button";
+                            item.className = "list-group-item list-group-item-action";
+                            item.textContent = actor.name;
+
+                            item.addEventListener("click", function () {
+
+                                selectedActors[actor.id] = actor.name;
+
+                                renderSelectedActors();
+
+                                resultsBox.innerHTML = "";
+                                searchInput.value = "";
+                            });
+
+                            resultsBox.appendChild(item);
+                        });
+                    });
+            });
+
+            function renderSelectedActors() {
+
+                selectedBox.innerHTML = "";
+
+                Object.entries(selectedActors).forEach(([id, name]) => {
+
+                    const tag = document.createElement("div");
+                    tag.className = "actor-tag";
+
+                    tag.innerHTML = `
+                        <span>${name}</span>
+
+                        <button type="button" data-id="${id}">
+                            ×
+                        </button>
+
+                        <input type="hidden" name="actors[]" value="${id}">
+                    `;
+
+                    tag.querySelector("button").addEventListener("click", function () {
+
+                        delete selectedActors[id];
+
+                        renderSelectedActors();
+                    });
+
+                    selectedBox.appendChild(tag);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
